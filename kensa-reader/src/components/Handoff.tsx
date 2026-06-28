@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { buildPrompt, getDocType, type DocType } from '../guide/prompts'
-import { AI_TARGETS, copyText, downloadImage, shareImage, shareNative, isNativeApp } from '../guide/ai'
+import { AI_TARGETS, copyText, downloadImage, shareImage, shareNative, isNativeApp, isIOS } from '../guide/ai'
 import { enhanceImage, type EnhancedImage } from '../guide/enhance'
 
 export function Handoff({
@@ -75,10 +75,12 @@ export function Handoff({
       void shareNative(blob, prompt).then(() => onShared())
       return
     }
-    // Web(プロトタイプ・iPhone等): 質問文を先にコピー（=送り先で貼り付け可）→ 画像のみ共有。
-    //   iOSは共有後に固まることがあるが、写真＋質問はAIに渡る。フリーズは許容（仕様）。
+    // Web: 質問文を先にコピー（=送り先で貼り付け可）→ 画像のみ共有。
     void copyText(prompt)
     void shareImage(blob)
+    // iOS以外(Android等)は共有後も固まらないので、完了画面(図解)へ進む。
+    //   iOSは共有後に固まる＆クリップボードを自動挿入するため、図解は出さない（自動ペーストで不要）。
+    if (!isIOS()) onShared()
   }
 
   return (

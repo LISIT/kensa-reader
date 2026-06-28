@@ -9,6 +9,15 @@ export function isNativeApp(): boolean {
   return Capacitor.isNativePlatform()
 }
 
+/** iOS(iPhone/iPad)か。iOSは共有後にページが固まる＆クリップボードを自動挿入するため、
+ *  共有後の完了画面(図解)は出さない。Android等では出す。 */
+export function isIOS(): boolean {
+  const ua = navigator.userAgent || ''
+  if (/iP(hone|od|ad)/.test(ua)) return true
+  // iPadOS 13+ は Mac を名乗るので touch で判定
+  return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1
+}
+
 export interface AiTarget {
   id: string
   label: string
