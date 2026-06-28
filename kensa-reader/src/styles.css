@@ -93,6 +93,22 @@ html, body {
 .btn.ghost { background: transparent; color: var(--muted); min-height: 48px; font-weight: 600; }
 .btn:disabled { opacity: 0.5; }
 
+/* label をボタンとして使う場合も確実に縦積み・全幅にする */
+label.btn { display: flex; }
+
+/* iOS Safari で確実にピッカーを開くため、input は display:none にせず画面外へ隠す */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---- 免責 ---- */
 .disclaimer {
   background: #fffbeb;

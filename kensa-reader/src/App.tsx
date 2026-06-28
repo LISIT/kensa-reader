@@ -17,7 +17,8 @@ export function App() {
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState('')
   const [preview, setPreview] = useState<string | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const photoRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLInputElement>(null)
 
   // 初回ロード
   useEffect(() => setSettings(loadSettings()), [])
@@ -71,7 +72,8 @@ export function App() {
     setPreview(null)
     setResult(null)
     setScreen('home')
-    if (fileRef.current) fileRef.current.value = ''
+    if (photoRef.current) photoRef.current.value = ''
+    if (cameraRef.current) cameraRef.current.value = ''
   }
 
   return (
@@ -83,12 +85,26 @@ export function App() {
         </button>
       </div>
 
+      {/* iOS Safari対策: input は display:none ではなく visually-hidden にし、
+          label[for] でネイティブのピッカーを開く。ライブラリ選択には capture を付けない。 */}
       <input
-        ref={fileRef}
+        ref={photoRef}
+        id="file-photo"
+        className="visually-hidden"
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) handleFile(f)
+        }}
+      />
+      <input
+        ref={cameraRef}
+        id="file-camera"
+        className="visually-hidden"
         type="file"
         accept="image/*"
         capture="environment"
-        style={{ display: 'none' }}
         onChange={(e) => {
           const f = e.target.files?.[0]
           if (f) handleFile(f)
@@ -105,9 +121,12 @@ export function App() {
               スマホで撮った検査結果の写真や、スクリーンショットを選んでください。
               数値をやさしい言葉で説明します。
             </p>
-            <button className="btn" onClick={() => fileRef.current?.click()}>
-              📷 写真をえらぶ・撮る
-            </button>
+            <label htmlFor="file-photo" className="btn" role="button">
+              🖼️ 写真をえらぶ
+            </label>
+            <label htmlFor="file-camera" className="btn secondary" role="button" style={{ marginTop: 10 }}>
+              📷 カメラで撮る
+            </label>
             <p className="help center" style={{ marginTop: 12 }}>
               いまの読み取り方法：<strong>{getEngine(settings.engineId).label}</strong>
             </p>
