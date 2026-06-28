@@ -22,6 +22,7 @@ export function Handoff({
   const [enhanced, setEnhanced] = useState<EnhancedImage | null>(null)
   const [toast, setToast] = useState('')
   const [showPrompt, setShowPrompt] = useState(false)
+  const [showMore, setShowMore] = useState(false)
 
   const info = getDocType(docType)
   const prompt = buildPrompt(docType)
@@ -101,56 +102,61 @@ export function Handoff({
       </div>
 
       <div className="card">
-        <h2>① 写真と質問をまとめて送る</h2>
-        <p className="muted small" style={{ marginTop: 0 }}>
-          かんたんです。送り先で「ChatGPT」などを選べます。
+        <p className="center" style={{ marginTop: 0, fontWeight: 700, fontSize: '1.05rem' }}>
+          このボタンを押すだけ👇
         </p>
-        <button className="btn" onClick={shareAll} disabled={!enhanced}>
-          📤 写真と質問をまとめて送る
+        <button className="btn" style={{ minHeight: 76, fontSize: '1.2rem' }} onClick={shareAll} disabled={!enhanced}>
+          📤 写真をAIに送って<br />やさしく説明してもらう
         </button>
+        <p className="center muted small" style={{ marginBottom: 0 }}>
+          送り先で「ChatGPT」などを選べます。
+        </p>
       </div>
 
-      <div className="card">
-        <h2>② うまくいかないときは、AIを選ぶ</h2>
-        <p className="muted small" style={{ marginTop: 0 }}>
-          ボタンを押すと質問文がコピーされ、AIの画面が開きます。あとは<strong>写真をはり付け</strong>、
-          <strong>長押し→ペースト</strong>で質問文をはり付けて送ってください。
-        </p>
-        {AI_TARGETS.map((t) => (
-          <button key={t.id} className="btn secondary" style={{ marginBottom: 10 }} onClick={() => openAi(t.url)}>
-            {t.emoji} {t.label}で説明してもらう
+      <button className="btn ghost" onClick={() => setShowMore((s) => !s)}>
+        {showMore ? '閉じる' : 'うまくいかないとき・別の方法 ▾'}
+      </button>
+
+      {showMore && (
+        <div className="card">
+          <p className="muted small" style={{ marginTop: 0 }}>
+            AIを自分で選んで開く方法です。開いた画面に<strong>写真をはり付け</strong>、
+            入力欄を<strong>長押し→ペースト</strong>で質問文をはって送ってください。
+          </p>
+          {AI_TARGETS.map((t) => (
+            <button key={t.id} className="btn secondary" style={{ marginBottom: 10 }} onClick={() => openAi(t.url)}>
+              {t.emoji} {t.label}で説明してもらう
+            </button>
+          ))}
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button className="btn ghost" style={{ flex: 1 }} onClick={() => enhanced && downloadImage(enhanced.blob)} disabled={!enhanced}>
+              💾 写真を保存
+            </button>
+            <button
+              className="btn ghost"
+              style={{ flex: 1 }}
+              onClick={async () => {
+                const ok = await copyText(prompt)
+                flash(ok ? '質問文をコピーしました。' : 'コピーできませんでした。')
+              }}
+            >
+              📋 質問文をコピー
+            </button>
+          </div>
+          <button className="btn ghost" onClick={() => setShowPrompt((s) => !s)} style={{ marginTop: 4 }}>
+            {showPrompt ? '質問文を閉じる' : '送る質問文を見る'}
           </button>
-        ))}
-        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-          <button className="btn ghost" style={{ flex: 1 }} onClick={() => enhanced && downloadImage(enhanced.blob)} disabled={!enhanced}>
-            💾 写真を保存
-          </button>
-          <button
-            className="btn ghost"
-            style={{ flex: 1 }}
-            onClick={async () => {
-              const ok = await copyText(prompt)
-              flash(ok ? '質問文をコピーしました。' : 'コピーできませんでした。下の文章を長押しでコピーしてください。')
-            }}
-          >
-            📋 質問文をコピー
-          </button>
+          {showPrompt && (
+            <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem', background: '#f8fafc', padding: 12, borderRadius: 12, color: '#334155' }}>
+              {prompt}
+            </pre>
+          )}
+          {onLocalAnalyze && docType === 'blood' && (
+            <button className="btn ghost" onClick={onLocalAnalyze} style={{ marginTop: 4 }}>
+              （AIを使わずに）アプリだけで数値を見る
+            </button>
+          )}
         </div>
-
-        <button className="btn ghost" onClick={() => setShowPrompt((s) => !s)} style={{ marginTop: 4 }}>
-          {showPrompt ? '質問文を閉じる' : '送る質問文を見る'}
-        </button>
-        {showPrompt && (
-          <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem', background: '#f8fafc', padding: 12, borderRadius: 12, color: '#334155' }}>
-            {prompt}
-          </pre>
-        )}
-      </div>
-
-      {onLocalAnalyze && docType === 'blood' && (
-        <button className="btn ghost" onClick={onLocalAnalyze} style={{ marginBottom: 8 }}>
-          （AIを使わずに）アプリだけで数値を見る
-        </button>
       )}
 
       <div className="disclaimer" style={{ marginTop: 8 }}>
