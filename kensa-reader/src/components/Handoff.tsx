@@ -68,6 +68,9 @@ export function Handoff({
     if (isNativeApp()) {
       // ★ネイティブ(Android等): 画像＋質問文を一度に共有。WebViewのフリーズが無いので
       //   共有が終わったら完了画面へ。アプリは応答したまま。
+      //   ※ ChatGPT等は共有された画像のみ取り込み、付随テキストは無視することが多いので、
+      //     質問文はクリップボードにも入れて「長押し→ペースト」で貼れるようにする。
+      void copyText(prompt)
       void shareNative(blob, prompt).then(() => onShared())
       return
     }
