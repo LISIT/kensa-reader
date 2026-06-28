@@ -25,10 +25,26 @@ export function App() {
   const photoRef = useRef<HTMLInputElement>(null)
   const cameraRef = useRef<HTMLInputElement>(null)
 
+  const [, setTick] = useState(0)
+
   useEffect(() => setSettings(loadSettings()), [])
   useEffect(() => {
     document.documentElement.style.setProperty('--fs', String(settings.fontScale))
   }, [settings.fontScale])
+
+  // iOS対策: 共有/外部アプリから戻った直後に操作不能になることがあるため、
+  // 復帰時に再描画を促してイベント処理を立て直す。
+  useEffect(() => {
+    const wake = () => setTick((t) => t + 1)
+    window.addEventListener('pageshow', wake)
+    window.addEventListener('focus', wake)
+    document.addEventListener('visibilitychange', wake)
+    return () => {
+      window.removeEventListener('pageshow', wake)
+      window.removeEventListener('focus', wake)
+      document.removeEventListener('visibilitychange', wake)
+    }
+  }, [])
 
   const persist = (s: Settings) => {
     setSettings(s)
