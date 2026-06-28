@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { buildPrompt, getDocType, type DocType } from '../guide/prompts'
-import { AI_TARGETS, copyText, downloadImage, shareImageAndText } from '../guide/ai'
+import { AI_TARGETS, copyText, downloadImage, shareImage } from '../guide/ai'
 import { enhanceImage, type EnhancedImage } from '../guide/enhance'
 
 export function Handoff({
@@ -20,6 +20,7 @@ export function Handoff({
   const [enhanced, setEnhanced] = useState<EnhancedImage | null>(null)
   const [toast, setToast] = useState('')
   const [showPrompt, setShowPrompt] = useState(false)
+  const [sent, setSent] = useState(false)
 
   const info = getDocType(docType)
   const prompt = buildPrompt(docType)
@@ -57,13 +58,52 @@ export function Handoff({
 
   async function shareAll() {
     if (!enhanced) return
-    await copyText(prompt)
-    const r = await shareImageAndText(enhanced.blob, prompt)
-    if (r === 'unsupported') {
-      flash('この端末では「まとめて送る」が使えません。下の「写真を保存」と「ChatGPTで説明」をお使いください。')
-    } else if (r === 'failed') {
+    await copyText(prompt) // 質問文は先にコピー（共有は画像のみ＝多くのAIアプリが候補に出る）
+    const r = await shareImage(enhanced.blob)
+    if (r === 'shared') {
+      setSent(true)
+    } else if (r === 'unsupported') {
+      flash('この端末では「まとめて送る」が使えません。下の「写真を保存」と各ボタンをお使いください。')
+    } else {
       flash('送れませんでした。下の「写真を保存」と各ボタンをお試しください。')
     }
+  }
+
+  if (sent) {
+    return (
+      <div>
+        <div className="card center">
+          <div style={{ fontSize: '3rem' }}>📤✅</div>
+          <h2>写真を送りました</h2>
+          <p style={{ marginTop: 0 }}>
+            送った先の<strong>AIの画面</strong>で、入力欄を<strong>長押し →「ペースト」</strong>で
+            質問文をはり付けて、送信してください。
+          </p>
+          <button
+            className="btn"
+            onClick={async () => {
+              const ok = await copyText(prompt)
+              flash(ok ? '質問文をもう一度コピーしました。' : 'コピーできませんでした。')
+            }}
+          >
+            📋 質問文をもう一度コピー
+          </button>
+          <button className="btn secondary" style={{ marginTop: 10 }} onClick={() => setSent(false)}>
+            ← 送る画面にもどる（別のAIにも送れます）
+          </button>
+          <button className="btn ghost" style={{ marginTop: 4 }} onClick={onReset}>
+            最初から
+          </button>
+        </div>
+
+        <div className="disclaimer">
+          <strong>大切なお願い：</strong> AIの説明は<strong>診断ではありません</strong>。
+          気になることは<strong>必ず主治医にご相談ください</strong>。
+        </div>
+
+        {toast && <Toast text={toast} />}
+      </div>
+    )
   }
 
   return (
@@ -154,25 +194,29 @@ export function Handoff({
         </button>
       </div>
 
-      {toast && (
-        <div
-          style={{
-            position: 'fixed',
-            left: 16,
-            right: 16,
-            bottom: 'calc(56px + env(safe-area-inset-bottom))',
-            background: '#0f172a',
-            color: '#fff',
-            padding: '12px 16px',
-            borderRadius: 12,
-            zIndex: 20,
-            fontSize: '0.92rem',
-            boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
-          }}
-        >
-          {toast}
-        </div>
-      )}
+      {toast && <Toast text={toast} />}
+    </div>
+  )
+}
+
+function Toast({ text }: { text: string }) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        left: 16,
+        right: 16,
+        bottom: 'calc(56px + env(safe-area-inset-bottom))',
+        background: '#0f172a',
+        color: '#fff',
+        padding: '12px 16px',
+        borderRadius: 12,
+        zIndex: 20,
+        fontSize: '0.92rem',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.3)',
+      }}
+    >
+      {text}
     </div>
   )
 }
