@@ -45,38 +45,51 @@ export function App() {
     document.documentElement.style.setProperty('--fs', String(settings.fontScale))
   }, [settings.fontScale])
 
-  // ★iOS対策（共有後フリーズの根治）:
+  // ★iOS対策（共有後フリーズの根治・イベント非依存）:
   //   外部アプリ（AI）へ出る前に Handoff が sessionStorage.pendingShare を立てる。
-  //   実際にアプリが裏に回って(hidden)から戻ってきた(visible)ら、ページを再読み込みして
-  //   タッチ不能状態をリセットし、完了画面(showSent)を表示する。
+  //   「一度 hidden になってから visible に戻った」ことを、イベント＋ポーリングの両方で検知し、
+  //   ページを再読み込みしてタッチ不能状態をリセット → 完了画面(showSent)を表示する。
   useEffect(() => {
-    const onVis = () => {
-      if (document.visibilityState === 'hidden') {
-        try {
-          if (sessionStorage.getItem('pendingShare') === '1') sessionStorage.setItem('wasHidden', '1')
-        } catch {
-          /* noop */
-        }
-        return
-      }
-      // visible
+    let sawHidden = false
+    let done = false
+    const check = () => {
+      if (done) return
+      let pending = false
       try {
-        if (sessionStorage.getItem('pendingShare') === '1' && sessionStorage.getItem('wasHidden') === '1') {
-          sessionStorage.setItem('showSent', sessionStorage.getItem('shareDocType') || 'blood')
-          sessionStorage.removeItem('pendingShare')
-          sessionStorage.removeItem('shareDocType')
-          sessionStorage.removeItem('wasHidden')
-          location.reload()
-        }
+        pending = sessionStorage.getItem('pendingShare') === '1'
       } catch {
         /* noop */
       }
+      if (!pending) {
+        sawHidden = false
+        return
+      }
+      if (document.visibilityState === 'hidden') {
+        sawHidden = true
+        return
+      }
+      // visible
+      if (sawHidden) {
+        done = true
+        try {
+          sessionStorage.setItem('showSent', sessionStorage.getItem('shareDocType') || 'blood')
+          sessionStorage.removeItem('pendingShare')
+          sessionStorage.removeItem('shareDocType')
+        } catch {
+          /* noop */
+        }
+        location.reload()
+      }
     }
-    document.addEventListener('visibilitychange', onVis)
-    window.addEventListener('pageshow', onVis)
+    const id = window.setInterval(check, 400)
+    document.addEventListener('visibilitychange', check)
+    window.addEventListener('pageshow', check)
+    window.addEventListener('focus', check)
     return () => {
-      document.removeEventListener('visibilitychange', onVis)
-      window.removeEventListener('pageshow', onVis)
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', check)
+      window.removeEventListener('pageshow', check)
+      window.removeEventListener('focus', check)
     }
   }, [])
 
