@@ -50,26 +50,30 @@ export function Handoff({
     window.setTimeout(() => setToast(''), 4000)
   }
 
-  // ★iOS対策: 操作の有効性(transient activation)を保つため、
-  //   activationが要る window.open / navigator.share を「最初に」呼び、コピーは後にする。
+  // ★iOS対策:
+  //  - クリップボードへのコピーは「ユーザー操作の中（=共有/オープンの前に即時発火）」で行う。
+  //    共有シートを閉じた後に copy すると activation 切れでブロックされ、貼り付けできなくなる。
+  //  - 共有後の画面切替(React再描画)は、共有シートが閉じきる前に走るとiOSでタッチが固まるため、
+  //    少し遅延させてから行う。
   function openAi(url: string) {
+    void copyText(prompt) // 操作中に即時コピー（await しない）
     window.open(url, '_blank', 'noopener')
-    void copyText(prompt).then(() =>
-      flash('質問文をコピーしました。開いた画面に写真をはり付け、入力欄を長押し→ペーストで質問文をはり付けて送ってください。'),
-    )
+    flash('質問文をコピーしました。開いた画面に写真をはり付け、入力欄を長押し→ペーストで質問文をはり付けて送ってください。')
   }
 
   function shareAll() {
     if (!enhanced) return
+    void copyText(prompt) // 操作中に即時コピー（await しない）→ 送り先で貼り付け可能に
     shareImage(enhanced.blob).then((r) => {
-      if (r === 'shared') {
-        setSent(true)
-        void copyText(prompt)
-      } else if (r === 'unsupported') {
-        flash('この端末では「まとめて送る」が使えません。下の「写真を保存」と各ボタンをお使いください。')
-      } else {
-        flash('送れませんでした。下の「写真を保存」と各ボタンをお試しください。')
-      }
+      window.setTimeout(() => {
+        if (r === 'shared') {
+          setSent(true)
+        } else if (r === 'unsupported') {
+          flash('この端末では「まとめて送る」が使えません。下の「写真を保存」と各ボタンをお使いください。')
+        } else {
+          flash('送れませんでした。下の「写真を保存」と各ボタンをお試しください。')
+        }
+      }, 400)
     })
   }
 

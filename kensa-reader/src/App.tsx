@@ -32,10 +32,21 @@ export function App() {
     document.documentElement.style.setProperty('--fs', String(settings.fontScale))
   }, [settings.fontScale])
 
-  // iOS対策: 共有/外部アプリから戻った直後に操作不能になることがあるため、
-  // 復帰時に再描画を促してイベント処理を立て直す。
+  // iOS対策: 共有/外部アプリから戻った直後にタッチが効かなくなることがあるため、
+  // 復帰時にリフロー（pointer-events トグル＋微小スクロール）でイベント処理を立て直す。
   useEffect(() => {
-    const wake = () => setTick((t) => t + 1)
+    const wake = () => {
+      try {
+        document.body.style.pointerEvents = 'none'
+        void document.body.offsetHeight // 強制リフロー
+        document.body.style.pointerEvents = ''
+        window.scrollBy(0, 1)
+        window.scrollBy(0, -1)
+      } catch {
+        /* noop */
+      }
+      setTick((t) => t + 1)
+    }
     window.addEventListener('pageshow', wake)
     window.addEventListener('focus', wake)
     document.addEventListener('visibilitychange', wake)
