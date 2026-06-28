@@ -8,6 +8,7 @@ import { Handoff } from './components/Handoff'
 import { SentScreen } from './components/SentScreen'
 import { Report } from './components/Report'
 import { SettingsModal } from './components/Settings'
+import { Credits } from './components/Credits'
 import type { DocType } from './guide/prompts'
 
 type Screen = 'home' | 'type' | 'handoff' | 'analyzing' | 'report' | 'sent'
@@ -119,7 +120,7 @@ export function App() {
       {screen === 'home' && settings.disclaimerAccepted && (
         <>
           <div className="card">
-            <h2>検査結果を、やさしく説明します</h2>
+            <h2>検査結果を、AIがやさしく説明します</h2>
             <p className="muted" style={{ marginTop: 0 }}>
               病院でもらった検査結果・お薬・紹介状などの写真を撮るか選ぶと、
               やさしい言葉での説明をもらえるようにお手伝いします。
@@ -140,6 +141,8 @@ export function App() {
               <li>ピントを合わせてから撮影してください。</li>
             </ul>
           </div>
+
+          <Credits />
         </>
       )}
 
