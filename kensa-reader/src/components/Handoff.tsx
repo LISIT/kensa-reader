@@ -3,6 +3,7 @@ import { buildPrompt, getDocType, type DocType } from '../guide/prompts'
 import { AI_TARGETS, copyText, downloadImage, shareImage, shareNative, isNativeApp } from '../guide/ai'
 import { enhanceImage, type EnhancedImage } from '../guide/enhance'
 import { PasteGuide } from './PasteGuide'
+import { AiLogos } from './AiLogos'
 
 export function Handoff({
   image,
@@ -120,6 +121,7 @@ export function Handoff({
         >
           📤 この写真をAIに送る
         </button>
+        <AiLogos />
       </div>
 
       <button className="btn ghost" onClick={() => setShowMore((s) => !s)}>
