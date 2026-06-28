@@ -3,27 +3,29 @@ import { getEngine } from './engine'
 import type { AnalysisResult } from './engine/types'
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, type Settings } from './engine/settings'
 import { DisclaimerFooter, DisclaimerGate } from './components/Disclaimer'
+import { TypeSelect } from './components/TypeSelect'
+import { Handoff } from './components/Handoff'
 import { Report } from './components/Report'
 import { SettingsModal } from './components/Settings'
+import type { DocType } from './guide/prompts'
 
-type Screen = 'home' | 'analyzing' | 'report' | 'error'
+type Screen = 'home' | 'type' | 'handoff' | 'analyzing' | 'report'
 
 export function App() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
   const [screen, setScreen] = useState<Screen>('home')
   const [showSettings, setShowSettings] = useState(false)
+  const [image, setImage] = useState<Blob | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [docType, setDocType] = useState<DocType>('blood')
   const [progress, setProgress] = useState(0)
   const [progressMsg, setProgressMsg] = useState('')
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState('')
-  const [preview, setPreview] = useState<string | null>(null)
   const photoRef = useRef<HTMLInputElement>(null)
   const cameraRef = useRef<HTMLInputElement>(null)
 
-  // 初回ロード
   useEffect(() => setSettings(loadSettings()), [])
-
-  // 文字サイズ反映
   useEffect(() => {
     document.documentElement.style.setProperty('--fs', String(settings.fontScale))
   }, [settings.fontScale])
@@ -32,27 +34,37 @@ export function App() {
     setSettings(s)
     saveSettings(s)
   }
-
   const acceptDisclaimer = () => persist({ ...settings, disclaimerAccepted: true })
 
-  async function handleFile(file: File) {
-    if (preview) URL.revokeObjectURL(preview)
-    setPreview(URL.createObjectURL(file))
+  function pickImage(file: File) {
+    if (imageUrl) URL.revokeObjectURL(imageUrl)
+    setImage(file)
+    setImageUrl(URL.createObjectURL(file))
+    setDocType('blood')
+    setError('')
+    setResult(null)
+    setScreen('type')
+  }
+
+  function reset() {
+    if (imageUrl) URL.revokeObjectURL(imageUrl)
+    setImage(null)
+    setImageUrl(null)
+    setResult(null)
+    setError('')
+    setScreen('home')
+    if (photoRef.current) photoRef.current.value = ''
+    if (cameraRef.current) cameraRef.current.value = ''
+  }
+
+  async function runLocalAnalyze() {
+    if (!image) return
     setScreen('analyzing')
     setProgress(0)
     setProgressMsg('準備しています…')
-    setError('')
-
-    const engine = getEngine(settings.engineId)
     try {
-      if (settings.engineId !== 'local' && !(await engine.isAvailable())) {
-        throw new Error(
-          settings.engineId === 'claude'
-            ? 'Claude のAPIキーが未設定、または無効です。設定画面をご確認ください。'
-            : 'ローカルOllamaに接続できません。サーバが起動しているかご確認ください。',
-        )
-      }
-      const r = await engine.analyzeBloodTest(file, {
+      const engine = getEngine('local')
+      const r = await engine.analyzeBloodTest(image, {
         sex: settings.sex,
         onProgress: (p, m) => {
           setProgress(p)
@@ -63,17 +75,8 @@ export function App() {
       setScreen('report')
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
-      setScreen('error')
+      setScreen('handoff')
     }
-  }
-
-  function reset() {
-    if (preview) URL.revokeObjectURL(preview)
-    setPreview(null)
-    setResult(null)
-    setScreen('home')
-    if (photoRef.current) photoRef.current.value = ''
-    if (cameraRef.current) cameraRef.current.value = ''
   }
 
   return (
@@ -85,8 +88,6 @@ export function App() {
         </button>
       </div>
 
-      {/* iOS Safari対策: input は display:none ではなく visually-hidden にし、
-          label[for] でネイティブのピッカーを開く。ライブラリ選択には capture を付けない。 */}
       <input
         ref={photoRef}
         id="file-photo"
@@ -95,7 +96,7 @@ export function App() {
         accept="image/*"
         onChange={(e) => {
           const f = e.target.files?.[0]
-          if (f) handleFile(f)
+          if (f) pickImage(f)
         }}
       />
       <input
@@ -107,7 +108,7 @@ export function App() {
         capture="environment"
         onChange={(e) => {
           const f = e.target.files?.[0]
-          if (f) handleFile(f)
+          if (f) pickImage(f)
         }}
       />
 
@@ -116,30 +117,48 @@ export function App() {
       {screen === 'home' && settings.disclaimerAccepted && (
         <>
           <div className="card">
-            <h2>血液検査の結果を読み取ります</h2>
+            <h2>検査結果を、やさしく説明します</h2>
             <p className="muted" style={{ marginTop: 0 }}>
-              スマホで撮った検査結果の写真や、スクリーンショットを選んでください。
-              数値をやさしい言葉で説明します。
+              病院でもらった検査結果・お薬・紹介状などの写真を撮るか選ぶと、
+              やさしい言葉での説明をもらえるようにお手伝いします。
             </p>
-            <label htmlFor="file-photo" className="btn" role="button">
+            <label htmlFor="file-camera" className="btn" role="button">
+              📷 写真を撮る
+            </label>
+            <label htmlFor="file-photo" className="btn secondary" role="button" style={{ marginTop: 10 }}>
               🖼️ 写真をえらぶ
             </label>
-            <label htmlFor="file-camera" className="btn secondary" role="button" style={{ marginTop: 10 }}>
-              📷 カメラで撮る
-            </label>
-            <p className="help center" style={{ marginTop: 12 }}>
-              いまの読み取り方法：<strong>{getEngine(settings.engineId).label}</strong>
-            </p>
           </div>
 
           <div className="card">
             <h2>📌 上手に撮るコツ</h2>
             <ul style={{ paddingLeft: '1.2em', margin: 0 }}>
               <li>明るい場所で、影が入らないように。</li>
-              <li>数値の表が、まっすぐ・大きく写るように。</li>
+              <li>書類が、まっすぐ・大きく写るように。</li>
               <li>ピントを合わせてから撮影してください。</li>
             </ul>
           </div>
+        </>
+      )}
+
+      {screen === 'type' && (
+        <TypeSelect imageUrl={imageUrl} onSelect={(t) => { setDocType(t); setScreen('handoff') }} onBack={reset} />
+      )}
+
+      {screen === 'handoff' && image && (
+        <>
+          {error && (
+            <div className="disclaimer" style={{ marginBottom: 12 }}>
+              うまく読み取れませんでした：{error}
+            </div>
+          )}
+          <Handoff
+            image={image}
+            docType={docType}
+            onBack={() => setScreen('type')}
+            onReset={reset}
+            onLocalAnalyze={runLocalAnalyze}
+          />
         </>
       )}
 
@@ -151,27 +170,19 @@ export function App() {
             <div className="bar">
               <span style={{ width: `${Math.round(progress * 100)}%` }} />
             </div>
-            <p className="muted small">写真はこの端末の中で処理されます（既定）。少しお待ちください。</p>
+            <p className="muted small">写真はこの端末の中で処理されます。少しお待ちください。</p>
           </div>
-          {preview && <img className="preview-img" src={preview} alt="選んだ写真" />}
+          {imageUrl && <img className="preview-img" src={imageUrl} alt="選んだ写真" />}
         </div>
       )}
 
       {screen === 'report' && result && (
-        <Report result={result} sex={settings.sex} onReset={reset} onResultChange={setResult} />
-      )}
-
-      {screen === 'error' && (
-        <div className="card">
-          <h2>うまく読み取れませんでした</h2>
-          <div className="disclaimer" style={{ marginBottom: 16 }}>
-            {error}
-          </div>
-          {preview && <img className="preview-img" src={preview} alt="選んだ写真" />}
-          <button className="btn secondary" style={{ marginTop: 16 }} onClick={reset}>
-            もう一度ためす
-          </button>
-        </div>
+        <Report
+          result={result}
+          sex={settings.sex}
+          onReset={reset}
+          onResultChange={setResult}
+        />
       )}
 
       {showSettings && (
