@@ -5,8 +5,8 @@ import type { OcrProviderId } from '../ocr'
 import type { Sex } from '../knowledge/bloodTests'
 
 const OCR_LABEL: Record<OcrProviderId, string> = {
-  paddle: 'PaddleOCR（高精度・推奨）',
-  tesseract: 'Tesseract（軽量・予備）',
+  tesseract: '標準（安定）',
+  paddle: 'PaddleOCR（高精度・実験的／重い）',
 }
 
 const SEX_LABEL: Record<Sex, string> = { male: '男性', female: '女性', unknown: '未設定' }
@@ -62,7 +62,7 @@ export function SettingsModal({
         <div className="field">
           <label>OCR（文字認識）エンジン</label>
           <div className="radio-row">
-            {(['paddle', 'tesseract'] as OcrProviderId[]).map((id) => (
+            {(['tesseract', 'paddle'] as OcrProviderId[]).map((id) => (
               <button
                 key={id}
                 className={s.ocrProviderId === id ? 'active' : ''}
@@ -73,8 +73,9 @@ export function SettingsModal({
             ))}
           </div>
           <div className="help">
-            推奨は PaddleOCR（スマホ写真・日本語に強い）。読み取れないときは Tesseract も試せます。
-            どちらも端末内で動作し、写真は外部に送りません。
+            通常は「標準」をお使いください。「PaddleOCR」は高精度ですが、端末によっては
+            読み込みが重く、うまく動かないことがあります。どちらも端末内で動作し、写真は外部に送りません。
+            読み取れない項目は、結果画面で手入力できます。
           </div>
         </div>
 

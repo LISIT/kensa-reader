@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import { ResultRow } from './ResultRow'
+import { ManualEditor } from './ManualEditor'
 import type { AnalysisResult, LabValue } from '../engine/types'
+import type { Sex } from '../knowledge/bloodTests'
 
 const CATEGORY_ORDER = ['血球', '肝臓', '腎臓', '脂質', '糖', '炎症', '電解質', 'その他']
 
@@ -15,11 +18,16 @@ function groupByCategory(values: LabValue[]): [string, LabValue[]][] {
 
 export function Report({
   result,
+  sex,
   onReset,
+  onResultChange,
 }: {
   result: AnalysisResult
+  sex: Sex
   onReset: () => void
+  onResultChange: (r: AnalysisResult) => void
 }) {
+  const [editing, setEditing] = useState(false)
   const groups = groupByCategory(result.values)
   const measured = result.values.filter((v) => v.value !== null)
 
@@ -29,6 +37,22 @@ export function Report({
         <h2>📋 やさしいまとめ</h2>
         <p style={{ margin: 0 }}>{result.summary}</p>
       </div>
+
+      <button className="btn secondary" style={{ marginBottom: 16 }} onClick={() => setEditing(true)}>
+        ✏️ 数値を確認・修正・項目を追加する
+      </button>
+
+      {editing && (
+        <ManualEditor
+          result={result}
+          sex={sex}
+          onSave={(r) => {
+            onResultChange(r)
+            setEditing(false)
+          }}
+          onCancel={() => setEditing(false)}
+        />
+      )}
 
       {result.warnings.length > 0 && (
         <div className="disclaimer" style={{ marginBottom: 16 }}>

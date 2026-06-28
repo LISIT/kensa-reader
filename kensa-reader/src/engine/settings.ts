@@ -15,11 +15,13 @@ export interface Settings {
   disclaimerAccepted: boolean
 }
 
-const KEY = 'kensa-reader/settings/v1'
+const KEY = 'kensa-reader/settings/v2'
 
 export const DEFAULT_SETTINGS: Settings = {
   engineId: 'local',
-  ocrProviderId: 'paddle',
+  // 既定は安定動作する tesseract。PaddleOCRはiOS Safariでメモリ不足によりタブが
+  // 落ちることがあるため、実験的オプション扱い（設定で選択可）。
+  ocrProviderId: 'tesseract',
   sex: 'unknown',
   fontScale: 1.0,
   claude: { apiKey: '', model: 'claude-sonnet-4-6' },

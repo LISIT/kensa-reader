@@ -157,7 +157,9 @@ export function App() {
         </div>
       )}
 
-      {screen === 'report' && result && <Report result={result} onReset={reset} />}
+      {screen === 'report' && result && (
+        <Report result={result} sex={settings.sex} onReset={reset} onResultChange={setResult} />
+      )}
 
       {screen === 'error' && (
         <div className="card">
