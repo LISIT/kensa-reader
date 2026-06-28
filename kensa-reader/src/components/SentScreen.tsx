@@ -17,58 +17,12 @@ export function SentScreen({ docType, onReset }: { docType: DocType; onReset: ()
     <div>
       <div className="card">
         <div className="center" style={{ fontSize: '3rem' }}>✅</div>
-        <h2 className="center">AIに送信しました</h2>
+        <h2 className="center">AIに送りました</h2>
         <p className="center" style={{ marginTop: 0 }}>
-          このあとは、<strong>開いたAIの画面</strong>で操作してください。
+          ひらいた<strong>AIの画面</strong>で、質問を貼り付けて（<strong>欄を長押し→ペースト</strong>）
+          送信してください。
         </p>
-        <p className="center" style={{ fontWeight: 700, marginBottom: 6 }}>あと1つだけ、やってください👇</p>
-
-        {/* 長押し→ペーストの図解 */}
-        <div
-          style={{
-            position: 'relative',
-            border: '2px dashed #94a3b8',
-            borderRadius: 14,
-            background: '#fff',
-            padding: '22px 14px 16px',
-            margin: '6px 0 4px',
-            textAlign: 'center',
-          }}
-        >
-          <div className="muted small" style={{ position: 'absolute', top: 6, left: 12 }}>
-            AIの「文字を入れる欄」
-          </div>
-          <div style={{ fontSize: '2rem' }}>👆</div>
-          <div
-            style={{
-              display: 'inline-block',
-              marginTop: 6,
-              background: '#0f172a',
-              color: '#fff',
-              borderRadius: 10,
-              padding: '8px 16px',
-              fontWeight: 700,
-            }}
-          >
-            📋 ペースト
-          </div>
-          <div className="muted small" style={{ marginTop: 8 }}>
-            欄を<strong>長く押す</strong>と、この「ペースト」が出ます
-          </div>
-        </div>
-
-        <div className="disclaimer" style={{ background: '#ecfeff', borderColor: '#a5f3fc', color: '#155e75', marginTop: 10 }}>
-          <div style={{ marginBottom: 6 }}>
-            <strong>①</strong> 文字を入れる欄を <strong>指で長く押す</strong>
-          </div>
-          <div style={{ marginBottom: 6 }}>
-            <strong>②</strong> 出てきた <strong>「ペースト」</strong> を押す → 質問が入る
-          </div>
-          <div>
-            <strong>③</strong> <strong>送信（↑）</strong> を押す
-          </div>
-        </div>
-        <p className="center muted small" style={{ marginTop: 8 }}>
+        <p className="center muted small">
           ※ 質問文はコピー済みです。貼れないときは下のボタンでもう一度コピーできます。
         </p>
         <button className="btn ghost" onClick={copy} style={{ marginTop: 4 }}>

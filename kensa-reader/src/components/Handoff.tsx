@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { buildPrompt, getDocType, type DocType } from '../guide/prompts'
 import { AI_TARGETS, copyText, downloadImage, shareImage, shareNative, isNativeApp } from '../guide/ai'
 import { enhanceImage, type EnhancedImage } from '../guide/enhance'
+import { PasteGuide } from './PasteGuide'
 
 export function Handoff({
   image,
@@ -105,15 +106,20 @@ export function Handoff({
       </div>
 
       <div className="card">
-        <p className="center" style={{ marginTop: 0, fontWeight: 700, fontSize: '1.05rem' }}>
-          このボタンを押すだけ👇
+        <h2 className="center" style={{ marginTop: 0 }}>AIにやさしく説明してもらう</h2>
+        <p className="center muted small" style={{ marginTop: 0 }}>
+          下のボタンを押すと「ChatGPT」などが開きます。<br />
+          ひらいたら、つぎのようにします👇
         </p>
-        <button className="btn" style={{ minHeight: 76, fontSize: '1.2rem' }} onClick={shareAll} disabled={!enhanced}>
-          📤 写真をAIに送って<br />やさしく説明してもらう
+        <PasteGuide />
+        <button
+          className="btn"
+          style={{ minHeight: 76, fontSize: '1.2rem', marginTop: 14 }}
+          onClick={shareAll}
+          disabled={!enhanced}
+        >
+          📤 この写真をAIに送る
         </button>
-        <p className="center muted small" style={{ marginBottom: 0 }}>
-          送り先で「ChatGPT」などを選べます。
-        </p>
       </div>
 
       <button className="btn ghost" onClick={() => setShowMore((s) => !s)}>
