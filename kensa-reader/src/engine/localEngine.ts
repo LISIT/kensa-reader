@@ -26,10 +26,12 @@ export const localEngine: Engine = {
     let fellBack = provider.id !== wantedId
 
     let ocr: OcrPipelineResult
+    let primaryError = ''
     try {
       ocr = await runOcr(image, provider, { onProgress })
     } catch (e) {
       // 本命OCR(主にPaddle: CDN/WebGPU/wasm依存)が失敗したら予備のTesseractで再試行
+      primaryError = String((e as Error)?.message ?? e).slice(0, 300)
       const fallback = getOcrProvider('tesseract')
       if (provider.id !== fallback.id) {
         provider = fallback
@@ -46,7 +48,8 @@ export const localEngine: Engine = {
 
     const warnings: string[] = []
     if (fellBack && usedProviderId === 'tesseract' && wantedId !== 'tesseract') {
-      warnings.push('高精度OCR(PaddleOCR)が使えなかったため、予備エンジンで読み取りました。電波の良い場所で再読み込みすると本命が使えることがあります。')
+      warnings.push('高精度OCR(PaddleOCR)が使えなかったため、予備エンジンで読み取りました。')
+      if (primaryError) warnings.push(`【診断情報】PaddleOCR失敗理由: ${primaryError}`)
     }
     if (values.length === 0) {
       warnings.push('検査項目を読み取れませんでした。血液検査の「数値の表」が大きく・まっすぐ写るように撮り直してください。')
