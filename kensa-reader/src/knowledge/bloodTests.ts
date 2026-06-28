@@ -47,7 +47,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   // ---- 血球（血算 / CBC） -------------------------------------------------
   {
     id: 'wbc', displayName: '白血球数 (WBC)', category: '血球',
-    aliases: ['wbc', '白血球', '白血球数', '白血球数(wbc)'],
+    aliases: ['wbc', 'wbc count', 'white blood cell', 'leukocyte', '白血球', '白血球数', '白血球数(wbc)'],
     unit: '/μL',
     ref: { low: 3300, high: 8600 },
     about: 'からだを細菌やウイルスから守る細胞の数です。',
@@ -56,7 +56,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'rbc', displayName: '赤血球数 (RBC)', category: '血球',
-    aliases: ['rbc', '赤血球', '赤血球数', '赤血球数(rbc)'],
+    aliases: ['rbc', 'rbc count', 'red blood cell', 'erythrocyte', '赤血球', '赤血球数', '赤血球数(rbc)'],
     unit: '万/μL',
     ref: { male: { low: 435, high: 555 }, female: { low: 386, high: 492 } },
     about: '酸素を全身に運ぶ細胞の数です。',
@@ -65,7 +65,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'hb', displayName: 'ヘモグロビン (Hb)', category: '血球',
-    aliases: ['hb', 'hgb', 'ヘモグロビン', '血色素', '血色素量'],
+    aliases: ['hb', 'hgb', 'hgb.', 'hemoglobin', 'haemoglobin', 'ヘモグロビン', '血色素', '血色素量'],
     unit: 'g/dL',
     ref: { male: { low: 13.7, high: 16.8 }, female: { low: 11.6, high: 14.8 } },
     about: '赤血球の中で酸素を運ぶ成分の量です。貧血の目安になります。',
@@ -74,7 +74,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'ht', displayName: 'ヘマトクリット (Ht)', category: '血球',
-    aliases: ['ht', 'hct', 'ヘマトクリット'],
+    aliases: ['ht', 'hct', 'hematocrit', 'haematocrit', 'ヘマトクリット'],
     unit: '%',
     ref: { male: { low: 40.7, high: 50.1 }, female: { low: 35.1, high: 44.4 } },
     about: '血液全体のうち赤血球が占める割合です。',
@@ -83,7 +83,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'plt', displayName: '血小板数 (PLT)', category: '血球',
-    aliases: ['plt', '血小板', '血小板数'],
+    aliases: ['plt', 'platelet', 'platelets', 'platelet count', '血小板', '血小板数'],
     unit: '万/μL',
     ref: { low: 15.8, high: 34.8 },
     about: '出血を止めるはたらきをする細胞の数です。',
@@ -94,7 +94,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   // ---- 肝臓 ---------------------------------------------------------------
   {
     id: 'ast', displayName: 'AST (GOT)', category: '肝臓',
-    aliases: ['ast', 'got', 'ast(got)', 'got(ast)', 'ast (got)'],
+    aliases: ['ast', 'got', 'sgot', 'ast(got)', 'got(ast)', 'ast (got)'],
     unit: 'U/L',
     ref: { low: 13, high: 30 },
     about: '肝臓や筋肉に多い酵素です。肝臓の状態の目安になります。',
@@ -102,7 +102,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'alt', displayName: 'ALT (GPT)', category: '肝臓',
-    aliases: ['alt', 'gpt', 'alt(gpt)', 'gpt(alt)', 'alt (gpt)'],
+    aliases: ['alt', 'gpt', 'sgpt', 'alt(gpt)', 'gpt(alt)', 'alt (gpt)'],
     unit: 'U/L',
     ref: { male: { low: 10, high: 42 }, female: { low: 7, high: 23 } },
     about: '主に肝臓に多い酵素です。肝臓のダメージの目安になります。',
@@ -126,7 +126,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'tbil', displayName: '総ビリルビン (T-Bil)', category: '肝臓',
-    aliases: ['t-bil', 'tbil', '総ビリルビン', 'ビリルビン', 't.bil'],
+    aliases: ['t-bil', 'tbil', 'total bilirubin', 'bilirubin', '総ビリルビン', 'ビリルビン', 't.bil'],
     unit: 'mg/dL',
     ref: { low: 0.4, high: 1.5 },
     about: '古くなった赤血球が分解されてできる黄色い色素です。',
@@ -142,7 +142,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'tp', displayName: '総蛋白 (TP)', category: '肝臓',
-    aliases: ['tp', '総蛋白', '総タンパク', '総蛋白質'],
+    aliases: ['tp', 'total protein', '総蛋白', '総タンパク', '総蛋白質'],
     unit: 'g/dL',
     ref: { low: 6.6, high: 8.1 },
     about: '血液中のタンパク質の合計量です。栄養状態などの目安になります。',
@@ -151,7 +151,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'alb', displayName: 'アルブミン (ALB)', category: '肝臓',
-    aliases: ['alb', 'アルブミン'],
+    aliases: ['alb', 'albumin', 'アルブミン'],
     unit: 'g/dL',
     ref: { low: 4.1, high: 5.1 },
     about: '血液中の主要なタンパク質で、栄養状態の目安になります。',
@@ -305,7 +305,7 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'neutro', displayName: '好中球', category: '血球',
-    aliases: ['好中球'],
+    aliases: ['好中球', 'neutrophil', 'neutrophils', 'neut', 'segmenters', 'segmented neutrophils'],
     unit: '%',
     ref: { low: 40, high: 75 },
     about: '白血球の一種で、主に細菌と戦います（白血球の割合）。',
@@ -313,34 +313,50 @@ export const BLOOD_TESTS: BloodTestItem[] = [
   },
   {
     id: 'lympho', displayName: 'リンパ球', category: '血球',
-    aliases: ['リンパ球'],
+    aliases: ['リンパ球', 'lymphocyte', 'lymphocytes', 'lymph'],
     unit: '%',
     ref: { low: 18, high: 59 },
     about: '白血球の一種で、主にウイルスと戦います（白血球の割合）。',
   },
   {
     id: 'mono', displayName: '単球', category: '血球',
-    aliases: ['単球'],
+    aliases: ['単球', 'monocyte', 'monocytes'],
     unit: '%',
     ref: { low: 0, high: 12 },
     about: '白血球の一種で、古くなった細胞などを処理します（白血球の割合）。',
   },
   {
     id: 'eosino', displayName: '好酸球', category: '血球',
-    aliases: ['好酸球'],
+    aliases: ['好酸球', 'eosinophil', 'eosinophils', 'eos'],
     unit: '%',
     ref: { low: 0, high: 10 },
     about: '白血球の一種で、アレルギーや寄生虫と関係します（白血球の割合）。',
   },
   {
     id: 'baso', displayName: '好塩基球', category: '血球',
-    aliases: ['好塩基球'],
+    aliases: ['好塩基球', 'basophil', 'basophils', 'baso'],
     unit: '%',
     ref: { low: 0, high: 3 },
     about: '白血球の一種で、アレルギー反応に関わります（白血球の割合）。',
   },
 
-  // ---- その他（筋・甲状腺） -----------------------------------------------
+  // ---- その他（鉄・筋・甲状腺） -------------------------------------------
+  {
+    id: 'fe', displayName: '血清鉄 (Fe)', category: 'その他',
+    aliases: ['血清鉄', 'fe', 'iron', 'serum iron', '鉄'],
+    unit: 'μg/dL',
+    ref: { low: 48, high: 170 },
+    about: '血液中の鉄の量です。貧血の原因を調べる手がかりになります。',
+    lowMeans: '鉄が不足する貧血（鉄欠乏性貧血）のときに低くなることがあります。',
+  },
+  {
+    id: 'ferritin', displayName: 'フェリチン', category: 'その他',
+    aliases: ['フェリチン', 'ferritin'],
+    unit: 'ng/mL',
+    ref: { low: 4, high: 120 },
+    about: 'からだに蓄えられた鉄の量を反映します。鉄不足の早期の目安になります。',
+    lowMeans: '低いと、からだの鉄の蓄えが少ない状態（鉄欠乏）を示すことがあります。',
+  },
   {
     id: 'ck', displayName: 'CK (CPK)', category: 'その他',
     aliases: ['ck', 'cpk', 'ck(cpk)', 'cpk(ck)', 'ck (cpk)'],

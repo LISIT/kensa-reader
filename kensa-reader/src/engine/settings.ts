@@ -1,10 +1,13 @@
 // 設定の保存（localStorage）。APIキーは端末内にのみ保存し、外部に送りません。
 import type { Sex } from '../knowledge/bloodTests'
+import type { OcrProviderId } from '../ocr'
 
 export type EngineId = 'local' | 'claude' | 'ollama'
 
 export interface Settings {
   engineId: EngineId
+  /** OCRエンジン。本命=paddle、予備=tesseract。 */
+  ocrProviderId: OcrProviderId
   sex: Sex
   fontScale: number // 1.0 = 標準, 1.25, 1.5
   claude: { apiKey: string; model: string }
@@ -16,6 +19,7 @@ const KEY = 'kensa-reader/settings/v1'
 
 export const DEFAULT_SETTINGS: Settings = {
   engineId: 'local',
+  ocrProviderId: 'paddle',
   sex: 'unknown',
   fontScale: 1.0,
   claude: { apiKey: '', model: 'claude-sonnet-4-6' },

@@ -25,7 +25,11 @@ Thumbs.db
 
 # テスト生成物
 **/scripts/.test-bundle.mjs
+**/extract.bundle.mjs
 
 # 個人の検査結果・画像は絶対にコミットしない（PHI/個人情報保護）
 samples/private/
 *.patient.*
+
+# OCR評価の出力(PHIを含みうる)
+**/scripts/ocr-lab/*.txt

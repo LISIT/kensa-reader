@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import type { Settings } from '../engine/settings'
 import type { EngineId } from '../engine/settings'
+import type { OcrProviderId } from '../ocr'
 import type { Sex } from '../knowledge/bloodTests'
+
+const OCR_LABEL: Record<OcrProviderId, string> = {
+  paddle: 'PaddleOCR（高精度・推奨）',
+  tesseract: 'Tesseract（軽量・予備）',
+}
 
 const SEX_LABEL: Record<Sex, string> = { male: '男性', female: '女性', unknown: '未設定' }
 const ENGINE_LABEL: Record<EngineId, string> = {
@@ -54,7 +60,26 @@ export function SettingsModal({
         </div>
 
         <div className="field">
-          <label>読み取りエンジン</label>
+          <label>OCR（文字認識）エンジン</label>
+          <div className="radio-row">
+            {(['paddle', 'tesseract'] as OcrProviderId[]).map((id) => (
+              <button
+                key={id}
+                className={s.ocrProviderId === id ? 'active' : ''}
+                onClick={() => set({ ocrProviderId: id })}
+              >
+                {OCR_LABEL[id]}
+              </button>
+            ))}
+          </div>
+          <div className="help">
+            推奨は PaddleOCR（スマホ写真・日本語に強い）。読み取れないときは Tesseract も試せます。
+            どちらも端末内で動作し、写真は外部に送りません。
+          </div>
+        </div>
+
+        <div className="field">
+          <label>解析の種類（通常はこのまま）</label>
           <div className="radio-row">
             {(['local', 'claude', 'ollama'] as EngineId[]).map((id) => (
               <button key={id} className={s.engineId === id ? 'active' : ''} onClick={() => set({ engineId: id })}>

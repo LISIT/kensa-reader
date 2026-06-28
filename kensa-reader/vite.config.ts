@@ -30,12 +30,15 @@ export default defineConfig({
         // OCRモデル(CDN)もオフライン用にキャッシュ。ユーザーの写真はキャッシュしない。
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
+            // OCRモデル(jsdelivr) / OCRエンジン(esm.sh) / 言語データ(projectnaptha) をキャッシュ。
+            // ユーザーの写真はキャッシュしない（端末内処理のみ）。
+            urlPattern: /^https:\/\/(cdn\.jsdelivr\.net|esm\.sh|tessdata\.projectnaptha\.com)\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'ocr-assets',
-              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 90 },
+              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 90 },
               cacheableResponse: { statuses: [0, 200] },
+              rangeRequests: true,
             },
           },
         ],
