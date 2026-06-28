@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { buildPrompt, getDocType, type DocType } from '../guide/prompts'
 import { AI_TARGETS, copyText, downloadImage, shareImage } from '../guide/ai'
 import { enhanceImage, type EnhancedImage } from '../guide/enhance'
@@ -58,15 +59,18 @@ export function Handoff({
 
   function openAi(url: string) {
     void copyText(prompt)
+    flushSync(() => onShared()) // 先に完了画面を同期描画
     window.open(url, '_blank', 'noopener')
-    onShared()
   }
 
   function shareAll() {
     if (!enhanced) return
     void copyText(prompt)
-    void shareImage(enhanced.blob) // 結果は待たない（投げっぱなし）
-    onShared() // すぐ完了画面へ
+    const blob = enhanced.blob
+    // ★完了画面を「同期的に」描画してから共有を開く。
+    //   そうしないと共有シートが描画に割り込み、完了画面が出ないまま固まって見える。
+    flushSync(() => onShared())
+    void shareImage(blob) // 結果は待たない（投げっぱなし）
   }
 
   return (
