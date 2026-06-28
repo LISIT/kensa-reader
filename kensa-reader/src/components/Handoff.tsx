@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { flushSync } from 'react-dom'
 import { buildPrompt, getDocType, type DocType } from '../guide/prompts'
 import { AI_TARGETS, copyText, downloadImage, shareImage, shareNative, isNativeApp } from '../guide/ai'
 import { enhanceImage, type EnhancedImage } from '../guide/enhance'
@@ -59,22 +58,22 @@ export function Handoff({
 
   function openAi(url: string) {
     void copyText(prompt)
-    flushSync(() => onShared()) // 先に完了画面を同期描画
     window.open(url, '_blank', 'noopener')
+    onShared()
   }
 
   function shareAll() {
     if (!enhanced) return
     const blob = enhanced.blob
     if (isNativeApp()) {
-      // ★ネイティブ共有: 画像＋質問文を一度に渡す。WebViewのフリーズが無いので
-      //   共有が終わってから（または並行して）完了画面へ。アプリは応答したまま。
+      // ★ネイティブ(Android等): 画像＋質問文を一度に共有。WebViewのフリーズが無いので
+      //   共有が終わったら完了画面へ。アプリは応答したまま。
       void shareNative(blob, prompt).then(() => onShared())
       return
     }
-    // Web(プロトタイプ): 質問文をコピー → 完了画面を同期描画 → 画像のみ共有
+    // Web(プロトタイプ・iPhone等): 質問文を先にコピー（=送り先で貼り付け可）→ 画像のみ共有。
+    //   iOSは共有後に固まることがあるが、写真＋質問はAIに渡る。フリーズは許容（仕様）。
     void copyText(prompt)
-    flushSync(() => onShared())
     void shareImage(blob)
   }
 
