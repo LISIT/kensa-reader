@@ -8,6 +8,17 @@ const base = process.env.BASE_PATH ?? '/'
 
 export default defineConfig({
   base,
+  build: {
+    rollupOptions: {
+      output: {
+        // onnxruntime-web / PaddleOCR は巨大なので独立チャンク化し、
+        // PWAのプリキャッシュ対象から外す（初回インストールを軽くする）。
+        manualChunks(id) {
+          if (id.includes('onnxruntime-web') || id.includes('@gutenye')) return 'ocr-engine'
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -27,18 +38,30 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // OCRモデル(CDN)もオフライン用にキャッシュ。ユーザーの写真はキャッシュしない。
+        // 巨大なOCRエンジン/wasmはプリキャッシュしない（遅延読込＋下のruntimeCachingで保存）
+        globIgnores: ['**/ocr-engine-*.js', '**/*.wasm'],
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [
           {
-            // OCRモデル(jsdelivr) / OCRエンジン(esm.sh) / 言語データ(projectnaptha) をキャッシュ。
+            // OCRモデル/wasm(jsdelivr) / 言語データ(projectnaptha) をキャッシュ。
             // ユーザーの写真はキャッシュしない（端末内処理のみ）。
-            urlPattern: /^https:\/\/(cdn\.jsdelivr\.net|esm\.sh|tessdata\.projectnaptha\.com)\/.*/i,
+            urlPattern: /^https:\/\/(cdn\.jsdelivr\.net|tessdata\.projectnaptha\.com)\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'ocr-assets',
               expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 90 },
               cacheableResponse: { statuses: [0, 200] },
               rangeRequests: true,
+            },
+          },
+          {
+            // 同一オリジンのOCRエンジン遅延チャンクをオフライン用にキャッシュ
+            urlPattern: ({ url }: { url: URL }) => url.pathname.includes('/assets/ocr-engine-'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'ocr-engine',
+              expiration: { maxEntries: 6, maxAgeSeconds: 60 * 60 * 24 * 90 },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],

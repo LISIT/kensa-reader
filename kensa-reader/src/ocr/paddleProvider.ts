@@ -8,9 +8,11 @@
 import type { OcrLine, OcrProvider, OcrRecognizeOptions, OcrResult } from './types'
 import { canvasToUrl } from './preprocess'
 
-// ★onnxruntime-web / @gutenye/ocr-browser は巨大(wasm 26MB)なので **バンドルせず実行時にCDNから取得**する。
-//   こうするとアプリ本体は軽量のまま、PaddleOCR選択時だけダウンロード（PWAでキャッシュ）。
-const OCR_BROWSER_CDN = 'https://esm.sh/@gutenye/ocr-browser@1.4.8?bundle'
+// onnxruntime-web / @gutenye/ocr-browser は Vite で動的import（遅延チャンク化）。
+// 巨大な wasm はバンドルせず CDN(jsdelivr) から取得し、単一スレッドで動かす
+//  （iOS等で SharedArrayBuffer/クロスオリジン分離が無くても動くようにする）。
+const ORT_VERSION = '1.27.0'
+const ORT_WASM_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`
 
 // PaddleOCR モデル（@gutenye/ocr-models, jsdelivr）
 const MODELS_BASE = 'https://cdn.jsdelivr.net/npm/@gutenye/ocr-models@1.4.2/assets/'
@@ -34,13 +36,17 @@ async function getOcr(onProgress?: (p: number, m?: string) => void): Promise<Non
   if (initPromise) return (await initPromise)!
   initPromise = (async () => {
     onProgress?.(0.1, 'OCRエンジンを準備中…（初回のみ・モデルを取得します）')
-    // CDN から実行時ロード（バンドルしない）。Vite に解析させないため @vite-ignore。
-    const mod: any = await import(/* @vite-ignore */ OCR_BROWSER_CDN)
+    // onnxruntime-web を先に読み、wasm の場所と単一スレッドを設定（iOSのCOI制約回避）
+    const ort: any = await import('onnxruntime-web')
+    ort.env.wasm.wasmPaths = ORT_WASM_BASE
+    ort.env.wasm.numThreads = 1
+    const mod: any = await import('@gutenye/ocr-browser')
     const Ocr = mod.default ?? mod.Ocr ?? mod
     const instance = await Ocr.create({
       models: PADDLE_MODELS,
       onnxOptions: {
-        executionProviders: [{ name: 'webgpu' }, { name: 'wasm' }],
+        // まず wasm（最も互換性が高い）。WebGPUは将来の高速化で追加検討。
+        executionProviders: ['wasm'],
       },
     })
     ocrInstance = instance
