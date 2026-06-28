@@ -1,5 +1,13 @@
 // 外部AI（ChatGPT/Claude/Gemini）へ渡す導線。API連携はしない。
-// ユーザーが自分のアプリ/ブラウザで、画像を添付し、質問文を貼り付ける流れを最短にする。
+// ネイティブ(Capacitor)では native share で画像＋質問文を一度に渡す（WebViewのフリーズを回避）。
+// Web(プロトタイプ)では navigator.share / クリップボードで代替する。
+import { Capacitor } from '@capacitor/core'
+import { Share } from '@capacitor/share'
+import { Filesystem, Directory } from '@capacitor/filesystem'
+
+export function isNativeApp(): boolean {
+  return Capacitor.isNativePlatform()
+}
 
 export interface AiTarget {
   id: string
@@ -58,6 +66,30 @@ export async function shareImage(image: Blob): Promise<ShareResult> {
   } catch (e) {
     // ユーザーがキャンセルした場合は AbortError
     if ((e as Error)?.name === 'AbortError') return 'cancelled'
+    return 'failed'
+  }
+}
+
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onloadend = () => resolve(String(r.result).split(',')[1] || '')
+    r.onerror = () => reject(new Error('read failed'))
+    r.readAsDataURL(blob)
+  })
+}
+
+/** ネイティブ共有: 画像をキャッシュに書き、画像＋質問文を一度に共有する */
+export async function shareNative(blob: Blob, text: string): Promise<ShareResult> {
+  try {
+    const data = await blobToBase64(blob)
+    const fileName = `kensa-${Date.now()}.jpg`
+    const written = await Filesystem.writeFile({ path: fileName, data, directory: Directory.Cache })
+    await Share.share({ text, files: [written.uri] })
+    return 'shared'
+  } catch (e) {
+    const msg = String((e as Error)?.message ?? e).toLowerCase()
+    if (msg.includes('cancel')) return 'cancelled'
     return 'failed'
   }
 }

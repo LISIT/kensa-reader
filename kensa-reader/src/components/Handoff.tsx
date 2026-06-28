@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { buildPrompt, getDocType, type DocType } from '../guide/prompts'
-import { AI_TARGETS, copyText, downloadImage, shareImage } from '../guide/ai'
+import { AI_TARGETS, copyText, downloadImage, shareImage, shareNative, isNativeApp } from '../guide/ai'
 import { enhanceImage, type EnhancedImage } from '../guide/enhance'
 
 export function Handoff({
@@ -65,12 +65,17 @@ export function Handoff({
 
   function shareAll() {
     if (!enhanced) return
-    void copyText(prompt)
     const blob = enhanced.blob
-    // ★完了画面を「同期的に」描画してから共有を開く。
-    //   そうしないと共有シートが描画に割り込み、完了画面が出ないまま固まって見える。
+    if (isNativeApp()) {
+      // ★ネイティブ共有: 画像＋質問文を一度に渡す。WebViewのフリーズが無いので
+      //   共有が終わってから（または並行して）完了画面へ。アプリは応答したまま。
+      void shareNative(blob, prompt).then(() => onShared())
+      return
+    }
+    // Web(プロトタイプ): 質問文をコピー → 完了画面を同期描画 → 画像のみ共有
+    void copyText(prompt)
     flushSync(() => onShared())
-    void shareImage(blob) // 結果は待たない（投げっぱなし）
+    void shareImage(blob)
   }
 
   return (
