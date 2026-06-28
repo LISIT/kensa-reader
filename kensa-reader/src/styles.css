@@ -1,0 +1,205 @@
+:root {
+  --fs: 1; /* JSから上書きする文字サイズ倍率 */
+  --teal: #0f766e;
+  --teal-d: #115e59;
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --high: #c2410c; /* 高い: オレンジ赤 */
+  --high-bg: #fff7ed;
+  --low: #1d4ed8; /* 低い: 青 */
+  --low-bg: #eff6ff;
+  --normal: #15803d; /* 範囲内: 緑 */
+  --normal-bg: #f0fdf4;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+  font-size: calc(18px * var(--fs));
+  line-height: 1.7;
+  -webkit-text-size-adjust: 100%;
+}
+
+#root { min-height: 100vh; }
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px calc(96px + env(safe-area-inset-bottom));
+}
+
+/* ---- ヘッダ ---- */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--teal);
+  color: #fff;
+  margin: 0 -16px 16px;
+  padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+.appbar h1 { font-size: calc(1.15rem); margin: 0; font-weight: 700; }
+.appbar .gear {
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+/* ---- カード ---- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card h2 { margin: 0 0 8px; font-size: 1.1rem; }
+
+/* ---- ボタン ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 64px;
+  border: none;
+  border-radius: 16px;
+  background: var(--teal);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 14px 18px;
+}
+.btn:active { background: var(--teal-d); }
+.btn.secondary { background: #fff; color: var(--teal); border: 2px solid var(--teal); }
+.btn.ghost { background: transparent; color: var(--muted); min-height: 48px; font-weight: 600; }
+.btn:disabled { opacity: 0.5; }
+
+/* ---- 免責 ---- */
+.disclaimer {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+}
+.disclaimer strong { color: #b45309; }
+
+.disclaimer-footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fffbeb;
+  border-top: 1px solid #fde68a;
+  color: #92400e;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  z-index: 9;
+}
+
+/* ---- 結果行 ---- */
+.result {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: #fff;
+}
+.result.high { background: var(--high-bg); border-color: #fed7aa; }
+.result.low { background: var(--low-bg); border-color: #bfdbfe; }
+.result.normal { background: var(--normal-bg); border-color: #bbf7d0; }
+
+.result-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.result-name { font-weight: 700; font-size: 1.05rem; }
+.result-value { font-size: 1.3rem; font-weight: 800; white-space: nowrap; }
+.result-value .unit { font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-left: 4px; }
+
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 2px 12px;
+  margin-top: 6px;
+}
+.badge.high { background: var(--high); color: #fff; }
+.badge.low { background: var(--low); color: #fff; }
+.badge.normal { background: var(--normal); color: #fff; }
+.badge.unknown { background: #94a3b8; color: #fff; }
+
+.range-text { font-size: 0.85rem; color: var(--muted); margin-top: 6px; }
+.about { font-size: 0.92rem; color: #334155; margin-top: 8px; }
+.flag-meaning { font-size: 0.92rem; margin-top: 6px; font-weight: 600; }
+.result.high .flag-meaning { color: var(--high); }
+.result.low .flag-meaning { color: var(--low); }
+
+/* バー（範囲内の位置の目安） */
+.gauge { position: relative; height: 10px; border-radius: 999px; background: #e2e8f0; margin: 10px 0 4px; }
+.gauge .normal-zone { position: absolute; top: 0; bottom: 0; background: #86efac; border-radius: 999px; }
+.gauge .marker { position: absolute; top: -3px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); border: 3px solid #fff; transform: translateX(-50%); }
+
+/* カテゴリ見出し */
+.cat-title { font-size: 0.95rem; font-weight: 800; color: var(--teal); margin: 18px 4px 8px; }
+
+/* 進捗 */
+.progress-wrap { text-align: center; padding: 40px 0; }
+.bar { height: 12px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin: 16px 0; }
+.bar > span { display: block; height: 100%; background: var(--teal); transition: width 0.3s; }
+.spinner { font-size: 2.5rem; }
+
+/* 設定 */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-weight: 700; margin-bottom: 6px; }
+.field input, .field select {
+  width: 100%; min-height: 52px; font-size: 1rem;
+  border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+  background: #fff; color: var(--ink);
+}
+.radio-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.radio-row button {
+  flex: 1; min-width: 90px; min-height: 52px;
+  border: 2px solid var(--line); border-radius: 12px; background: #fff;
+  font-weight: 700; font-size: 1rem; cursor: pointer; color: var(--ink);
+}
+.radio-row button.active { border-color: var(--teal); background: #ecfeff; color: var(--teal-d); }
+
+.help { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+.preview-img { width: 100%; border-radius: 12px; border: 1px solid var(--line); margin-top: 12px; }
+
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5);
+  display: flex; align-items: flex-end; justify-content: center; z-index: 50;
+}
+.modal {
+  background: #fff; width: 100%; max-width: 720px;
+  border-radius: 20px 20px 0 0; padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  max-height: 90vh; overflow-y: auto;
+}
+.modal h2 { margin-top: 0; }
+
+.tip {
+  background: #f8fafc; border: 1px solid var(--line);
+  border-radius: 12px; padding: 12px 14px; margin-top: 8px; font-size: 0.92rem;
+}
+.center { text-align: center; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }

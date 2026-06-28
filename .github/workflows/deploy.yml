@@ -1,0 +1,52 @@
+name: Deploy kensa-reader to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'kensa-reader/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: kensa-reader
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: kensa-reader/package-lock.json
+      - run: npm ci
+      - name: Build (サブパス配信のため BASE_PATH を指定)
+        run: npm run build
+        env:
+          # リポジトリ名で配信される場合のサブパス。
+          # ユーザーページ(<user>.github.io)直下なら "/" に変更。
+          BASE_PATH: /vLLM-apps/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: kensa-reader/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
