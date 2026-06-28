@@ -16,28 +16,31 @@ export function SentScreen({ docType, onReset }: { docType: DocType; onReset: ()
   return (
     <div>
       <div className="card">
-        <div className="center" style={{ fontSize: '2.6rem' }}>📤✅</div>
-        <h2 className="center">写真を送りました</h2>
-        <p className="center" style={{ marginTop: 0, fontWeight: 700 }}>あと1ステップで完成です！</p>
+        <div className="center" style={{ fontSize: '3rem' }}>✅</div>
+        <h2 className="center">AIに送信しました</h2>
+        <p className="center" style={{ marginTop: 0 }}>
+          このあとは、<strong>開いたAIの画面</strong>で操作してください。
+        </p>
         <div className="disclaimer" style={{ background: '#ecfeff', borderColor: '#a5f3fc', color: '#155e75' }}>
           <div style={{ marginBottom: 8 }}>
-            <strong>１.</strong> 送った先の<strong>AIの画面</strong>を開きます（写真はもう貼られています）。
+            ・写真はもう送られています。
           </div>
           <div style={{ marginBottom: 8 }}>
-            <strong>２.</strong> 文字を入れる欄を<strong>指で長押し</strong>して、出てくる<strong>「ペースト」</strong>を押します。
+            ・質問の文章は<strong>自動で貼り付け</strong>られています。<br />
+            もし入っていなければ、入力欄を<strong>長押し →「ペースト」</strong>で貼れます。
           </div>
           <div>
-            <strong>３.</strong> 質問の文章がはり付くので、<strong>送信（↑）</strong>を押してください。
+            ・あとは<strong>送信（↑）ボタン</strong>を押すだけです。
           </div>
         </div>
         <p className="center muted small" style={{ marginTop: 8 }}>
-          ※ 質問文はコピー済みです。貼れないときは下のボタンでもう一度コピーできます。
+          ※ このアプリの操作はここまでです。次に使うときは、もう一度ひらいてください。
         </p>
-        <button className="btn" onClick={copy}>
+        <button className="btn ghost" onClick={copy} style={{ marginTop: 4 }}>
           📋 質問文をもう一度コピーする
         </button>
-        <button className="btn ghost" style={{ marginTop: 8 }} onClick={onReset}>
-          最初から
+        <button className="btn ghost" style={{ marginTop: 4 }} onClick={onReset}>
+          別の写真をみる（最初から）
         </button>
       </div>
 

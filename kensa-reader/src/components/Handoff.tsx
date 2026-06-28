@@ -8,12 +8,14 @@ export function Handoff({
   docType,
   onBack,
   onReset,
+  onShared,
   onLocalAnalyze,
 }: {
   image: Blob
   docType: DocType
   onBack: () => void
   onReset: () => void
+  onShared: () => void
   onLocalAnalyze?: () => void
 }) {
   const [rotate, setRotate] = useState(0)
@@ -49,53 +51,22 @@ export function Handoff({
     window.setTimeout(() => setToast(''), 4000)
   }
 
-  // ★iOS対策:
-  //  - クリップボードへのコピーは「ユーザー操作の中（=共有/オープンの前に即時発火）」で行う。
-  //    共有シートを閉じた後に copy すると activation 切れでブロックされ、貼り付けできなくなる。
-  //  - 共有後の画面切替(React再描画)は、共有シートが閉じきる前に走るとiOSでタッチが固まるため、
-  //    少し遅延させてから行う。
-  // 外部アプリへ出る前に「保留フラグ」を立てる。戻ってきたら App 側が検知して
-  // ページを作り直し（軽い再読み込み）→ 完了画面へ。iOSの共有後フリーズを確実に回避する。
-  function markPending() {
-    try {
-      sessionStorage.setItem('pendingShare', '1')
-      sessionStorage.setItem('shareDocType', docType)
-    } catch {
-      /* noop */
-    }
-  }
-  function clearPending() {
-    try {
-      sessionStorage.removeItem('pendingShare')
-      sessionStorage.removeItem('shareDocType')
-    } catch {
-      /* noop */
-    }
-  }
+  // ★方針: 「共有/AIへ渡したら、戻って続きをやる」設計はやめる。
+  //   渡した瞬間に静的な「送信しました」完了画面へ切り替え、待機/処理を一切残さない
+  //   （iOSの共有後フリーズが起きても、固まって見えるUIを残さないため）。
+  //   - クリップボードへのコピーは操作中（共有/オープンの前）に即時発火＝貼り付け可能に。
 
   function openAi(url: string) {
-    void copyText(prompt) // 操作中に即時コピー（await しない）
-    markPending()
+    void copyText(prompt)
     window.open(url, '_blank', 'noopener')
-    flash('質問文をコピーしました。開いた画面に写真をはり付け、入力欄を長押し→ペーストで送ってください。')
+    onShared()
   }
 
   function shareAll() {
     if (!enhanced) return
-    void copyText(prompt) // 操作中に即時コピー（await しない）→ 送り先で貼り付け可能に
-    markPending()
-    shareImage(enhanced.blob).then((r) => {
-      if (r === 'shared') return // 戻ってきたら App が再読み込みして完了画面へ
-      clearPending()
-      window.setTimeout(() => {
-        if (r === 'unsupported') {
-          flash('この端末では「まとめて送る」が使えません。下の「写真を保存」と各ボタンをお使いください。')
-        } else if (r === 'failed') {
-          flash('送れませんでした。下の「写真を保存」と各ボタンをお試しください。')
-        }
-        // cancelled は何もしない
-      }, 300)
-    })
+    void copyText(prompt)
+    void shareImage(enhanced.blob) // 結果は待たない（投げっぱなし）
+    onShared() // すぐ完了画面へ
   }
 
   return (
