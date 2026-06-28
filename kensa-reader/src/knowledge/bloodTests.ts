@@ -278,6 +278,93 @@ export const BLOOD_TESTS: BloodTestItem[] = [
     ref: { low: 101, high: 108 },
     about: '体内の水分・酸とアルカリのバランスに関わるミネラルです。',
   },
+
+  // ---- 血球（赤血球指数・白血球分画） -------------------------------------
+  {
+    id: 'mcv', displayName: 'MCV（赤血球の大きさ）', category: '血球',
+    aliases: ['mcv'],
+    unit: 'fL',
+    ref: { low: 83.6, high: 98.2 },
+    about: '赤血球1個の平均的な大きさです。貧血の種類を見分ける手がかりになります。',
+    highMeans: '大きめの場合、ビタミンB12・葉酸の不足などと関係することがあります。',
+    lowMeans: '小さめの場合、鉄分の不足（鉄欠乏性貧血）などと関係することがあります。',
+  },
+  {
+    id: 'mch', displayName: 'MCH', category: '血球',
+    aliases: ['mch'],
+    unit: 'pg',
+    ref: { low: 27.5, high: 33.2 },
+    about: '赤血球1個に含まれるヘモグロビンの平均量です。',
+  },
+  {
+    id: 'mchc', displayName: 'MCHC', category: '血球',
+    aliases: ['mchc'],
+    unit: '%',
+    ref: { low: 31.7, high: 35.3 },
+    about: '赤血球の中のヘモグロビンの濃さです。',
+  },
+  {
+    id: 'neutro', displayName: '好中球', category: '血球',
+    aliases: ['好中球'],
+    unit: '%',
+    ref: { low: 40, high: 75 },
+    about: '白血球の一種で、主に細菌と戦います（白血球の割合）。',
+    highMeans: '細菌感染や炎症で増えることがあります。',
+  },
+  {
+    id: 'lympho', displayName: 'リンパ球', category: '血球',
+    aliases: ['リンパ球'],
+    unit: '%',
+    ref: { low: 18, high: 59 },
+    about: '白血球の一種で、主にウイルスと戦います（白血球の割合）。',
+  },
+  {
+    id: 'mono', displayName: '単球', category: '血球',
+    aliases: ['単球'],
+    unit: '%',
+    ref: { low: 0, high: 12 },
+    about: '白血球の一種で、古くなった細胞などを処理します（白血球の割合）。',
+  },
+  {
+    id: 'eosino', displayName: '好酸球', category: '血球',
+    aliases: ['好酸球'],
+    unit: '%',
+    ref: { low: 0, high: 10 },
+    about: '白血球の一種で、アレルギーや寄生虫と関係します（白血球の割合）。',
+  },
+  {
+    id: 'baso', displayName: '好塩基球', category: '血球',
+    aliases: ['好塩基球'],
+    unit: '%',
+    ref: { low: 0, high: 3 },
+    about: '白血球の一種で、アレルギー反応に関わります（白血球の割合）。',
+  },
+
+  // ---- その他（筋・甲状腺） -----------------------------------------------
+  {
+    id: 'ck', displayName: 'CK (CPK)', category: 'その他',
+    aliases: ['ck', 'cpk', 'ck(cpk)', 'cpk(ck)', 'ck (cpk)'],
+    unit: 'U/L',
+    ref: { male: { low: 59, high: 248 }, female: { low: 41, high: 153 } },
+    about: '主に筋肉に多い酵素です。筋肉の状態の目安になります。',
+    highMeans: '運動のあとや筋肉のダメージで高くなることがあります。',
+  },
+  {
+    id: 'tsh', displayName: 'TSH（甲状腺刺激ホルモン）', category: 'その他',
+    aliases: ['tsh'],
+    unit: 'μIU/mL',
+    ref: { low: 0.5, high: 5.0 },
+    about: '甲状腺のはたらきを調整するホルモンです。',
+    highMeans: '甲状腺のはたらきが低めのときに高くなることがあります。',
+    lowMeans: '甲状腺のはたらきが高めのときに低くなることがあります。',
+  },
+  {
+    id: 'ft4', displayName: 'FT4（遊離サイロキシン）', category: 'その他',
+    aliases: ['ft4', 'free t4', 'free t', 'f-t4', '遊離サイロキシン'],
+    unit: 'ng/dL',
+    ref: { low: 0.9, high: 1.7 },
+    about: '甲状腺ホルモンの一つです。甲状腺の状態の目安になります。',
+  },
 ]
 
 /** alias 照合のための索引（小文字キー → 項目） */

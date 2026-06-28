@@ -13,7 +13,10 @@ function escapeRegExp(s: string): string {
 function normalizeLine(input: string): string {
   let s = input.replace(/[！-～]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
   s = s.replace(/　/g, ' ')
-  s = s.replace(/[‐‑‒–—―ー−~〜]/g, '-') // ダッシュ/長音/チルダを '-' に統一
+  // ダッシュ/チルダを '-' に統一。ただしカタカナ長音符「ー」は語を壊すので含めない。
+  s = s.replace(/[‐‑‒–—―−~〜]/g, '-')
+  // 長音符「ー」は、数字に挟まれている範囲表記のときだけ '-' とみなす（例: 7ー38）。
+  s = s.replace(/(\d)\s*ー\s*(\d)/g, '$1-$2')
   s = s.replace(/(\d),(\d{3})/g, '$1$2') // 5,400 -> 5400
   s = s.replace(/\s+/g, ' ').trim()
   return s
@@ -151,4 +154,9 @@ export function extractLabValues(lines: string[], sex: Sex): ExtractResult {
 /** alias から既知項目を引く（外部エンジンの構造化出力の補正に使用） */
 export function lookupItem(name: string): BloodTestItem | undefined {
   return ALIAS_INDEX.get(name.trim().toLowerCase())
+}
+
+/** OCR結果の「良さ」を採点（向き自動判定用）。読み取れた検査項目数を返す。 */
+export function scoreText(lines: string[]): number {
+  return extractLabValues(lines, 'unknown').values.length
 }
