@@ -34,9 +34,10 @@ jobs:
       - name: Build (サブパス配信のため BASE_PATH を指定)
         run: npm run build
         env:
-          # リポジトリ名で配信される場合のサブパス。
-          # ユーザーページ(<user>.github.io)直下なら "/" に変更。
-          BASE_PATH: /vLLM-apps/
+          # GitHub Pages のサブパス = リポジトリ名。
+          # 例: https://lisit.github.io/kensa-reader/
+          # ユーザー/組織ページ(<owner>.github.io)直下に置くなら "/" に変更。
+          BASE_PATH: /kensa-reader/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: kensa-reader/dist

@@ -49,13 +49,13 @@ node scripts/.test-bundle.mjs
 
 ## 無料で公開する（GitHub Pages）
 
-1. このリポジトリ（vLLM-apps）を GitHub に push。
+1. このリポジトリを GitHub に push。
 2. リポジトリの **Settings → Pages → Build and deployment → Source: GitHub Actions** を選択。
 3. 同梱の [.github/workflows/deploy.yml](../.github/workflows/deploy.yml) が自動でビルド＆公開します。
-4. 公開URL（例 `https://<ユーザー名>.github.io/vLLM-apps/`）を、LINE等でご家族に送るだけ。
+4. 公開URL（例 `https://lisit.github.io/kensa-reader/`）を、LINE等でご家族に送るだけ。
 
-> サブパス配信のため、ビルド時に `BASE_PATH=/vLLM-apps/` を指定しています（ワークフロー内で設定済み）。
-> 独自ドメインやユーザーページ（`<user>.github.io`直下）に置く場合は `BASE_PATH=/` にしてください。
+> サブパス配信のため、ビルド時に `BASE_PATH=/kensa-reader/` を指定しています（ワークフロー内で設定済み）。
+> 独自ドメインやユーザー/組織ページ（`<owner>.github.io`直下）に置く場合は `BASE_PATH=/` にしてください。
 
 ## 対応している検査項目（v1）
 
