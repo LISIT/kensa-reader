@@ -5,11 +5,12 @@ import { DEFAULT_SETTINGS, loadSettings, saveSettings, type Settings } from './e
 import { DisclaimerFooter, DisclaimerGate } from './components/Disclaimer'
 import { TypeSelect } from './components/TypeSelect'
 import { Handoff } from './components/Handoff'
+import { SentScreen } from './components/SentScreen'
 import { Report } from './components/Report'
 import { SettingsModal } from './components/Settings'
 import type { DocType } from './guide/prompts'
 
-type Screen = 'home' | 'type' | 'handoff' | 'analyzing' | 'report'
+type Screen = 'home' | 'type' | 'handoff' | 'analyzing' | 'report' | 'sent'
 
 export function App() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
@@ -25,35 +26,57 @@ export function App() {
   const photoRef = useRef<HTMLInputElement>(null)
   const cameraRef = useRef<HTMLInputElement>(null)
 
-  const [, setTick] = useState(0)
+  // 共有/AIから戻ってきたら、ページを作り直して完了画面を出す（下の useEffect で設定）
+  useEffect(() => {
+    setSettings(loadSettings())
+    try {
+      const ss = sessionStorage.getItem('showSent')
+      if (ss) {
+        sessionStorage.removeItem('showSent')
+        setDocType(ss as DocType)
+        setScreen('sent')
+      }
+    } catch {
+      /* noop */
+    }
+  }, [])
 
-  useEffect(() => setSettings(loadSettings()), [])
   useEffect(() => {
     document.documentElement.style.setProperty('--fs', String(settings.fontScale))
   }, [settings.fontScale])
 
-  // iOS対策: 共有/外部アプリから戻った直後にタッチが効かなくなることがあるため、
-  // 復帰時にリフロー（pointer-events トグル＋微小スクロール）でイベント処理を立て直す。
+  // ★iOS対策（共有後フリーズの根治）:
+  //   外部アプリ（AI）へ出る前に Handoff が sessionStorage.pendingShare を立てる。
+  //   実際にアプリが裏に回って(hidden)から戻ってきた(visible)ら、ページを再読み込みして
+  //   タッチ不能状態をリセットし、完了画面(showSent)を表示する。
   useEffect(() => {
-    const wake = () => {
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') {
+        try {
+          if (sessionStorage.getItem('pendingShare') === '1') sessionStorage.setItem('wasHidden', '1')
+        } catch {
+          /* noop */
+        }
+        return
+      }
+      // visible
       try {
-        document.body.style.pointerEvents = 'none'
-        void document.body.offsetHeight // 強制リフロー
-        document.body.style.pointerEvents = ''
-        window.scrollBy(0, 1)
-        window.scrollBy(0, -1)
+        if (sessionStorage.getItem('pendingShare') === '1' && sessionStorage.getItem('wasHidden') === '1') {
+          sessionStorage.setItem('showSent', sessionStorage.getItem('shareDocType') || 'blood')
+          sessionStorage.removeItem('pendingShare')
+          sessionStorage.removeItem('shareDocType')
+          sessionStorage.removeItem('wasHidden')
+          location.reload()
+        }
       } catch {
         /* noop */
       }
-      setTick((t) => t + 1)
     }
-    window.addEventListener('pageshow', wake)
-    window.addEventListener('focus', wake)
-    document.addEventListener('visibilitychange', wake)
+    document.addEventListener('visibilitychange', onVis)
+    window.addEventListener('pageshow', onVis)
     return () => {
-      window.removeEventListener('pageshow', wake)
-      window.removeEventListener('focus', wake)
-      document.removeEventListener('visibilitychange', wake)
+      document.removeEventListener('visibilitychange', onVis)
+      window.removeEventListener('pageshow', onVis)
     }
   }, [])
 
@@ -80,6 +103,14 @@ export function App() {
     setResult(null)
     setError('')
     setScreen('home')
+    try {
+      sessionStorage.removeItem('pendingShare')
+      sessionStorage.removeItem('shareDocType')
+      sessionStorage.removeItem('wasHidden')
+      sessionStorage.removeItem('showSent')
+    } catch {
+      /* noop */
+    }
     if (photoRef.current) photoRef.current.value = ''
     if (cameraRef.current) cameraRef.current.value = ''
   }
@@ -202,6 +233,8 @@ export function App() {
           {imageUrl && <img className="preview-img" src={imageUrl} alt="選んだ写真" />}
         </div>
       )}
+
+      {screen === 'sent' && <SentScreen docType={docType} onReset={reset} />}
 
       {screen === 'report' && result && (
         <Report

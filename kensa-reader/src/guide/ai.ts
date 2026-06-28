@@ -41,7 +41,7 @@ export async function copyText(text: string): Promise<boolean> {
   }
 }
 
-export type ShareResult = 'shared' | 'unsupported' | 'failed'
+export type ShareResult = 'shared' | 'cancelled' | 'unsupported' | 'failed'
 
 /** 画像を端末の共有シートで送る（画像のみ＝より多くのAIアプリが候補に出る。
  *  質問文は別途クリップボードにコピーしておき、送り先で貼り付けてもらう）。 */
@@ -56,8 +56,8 @@ export async function shareImage(image: Blob): Promise<ShareResult> {
     }
     return 'unsupported'
   } catch (e) {
-    // ユーザーがキャンセルした場合も例外になる
-    if ((e as Error)?.name === 'AbortError') return 'shared'
+    // ユーザーがキャンセルした場合は AbortError
+    if ((e as Error)?.name === 'AbortError') return 'cancelled'
     return 'failed'
   }
 }

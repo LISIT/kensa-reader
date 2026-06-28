@@ -20,7 +20,6 @@ export function Handoff({
   const [enhanced, setEnhanced] = useState<EnhancedImage | null>(null)
   const [toast, setToast] = useState('')
   const [showPrompt, setShowPrompt] = useState(false)
-  const [sent, setSent] = useState(false)
 
   const info = getDocType(docType)
   const prompt = buildPrompt(docType)
@@ -55,74 +54,48 @@ export function Handoff({
   //    共有シートを閉じた後に copy すると activation 切れでブロックされ、貼り付けできなくなる。
   //  - 共有後の画面切替(React再描画)は、共有シートが閉じきる前に走るとiOSでタッチが固まるため、
   //    少し遅延させてから行う。
+  // 外部アプリへ出る前に「保留フラグ」を立てる。戻ってきたら App 側が検知して
+  // ページを作り直し（軽い再読み込み）→ 完了画面へ。iOSの共有後フリーズを確実に回避する。
+  function markPending() {
+    try {
+      sessionStorage.setItem('pendingShare', '1')
+      sessionStorage.setItem('shareDocType', docType)
+    } catch {
+      /* noop */
+    }
+  }
+  function clearPending() {
+    try {
+      sessionStorage.removeItem('pendingShare')
+      sessionStorage.removeItem('shareDocType')
+    } catch {
+      /* noop */
+    }
+  }
+
   function openAi(url: string) {
     void copyText(prompt) // 操作中に即時コピー（await しない）
+    markPending()
     window.open(url, '_blank', 'noopener')
-    flash('質問文をコピーしました。開いた画面に写真をはり付け、入力欄を長押し→ペーストで質問文をはり付けて送ってください。')
+    flash('質問文をコピーしました。開いた画面に写真をはり付け、入力欄を長押し→ペーストで送ってください。')
   }
 
   function shareAll() {
     if (!enhanced) return
     void copyText(prompt) // 操作中に即時コピー（await しない）→ 送り先で貼り付け可能に
+    markPending()
     shareImage(enhanced.blob).then((r) => {
+      if (r === 'shared') return // 戻ってきたら App が再読み込みして完了画面へ
+      clearPending()
       window.setTimeout(() => {
-        if (r === 'shared') {
-          setSent(true)
-        } else if (r === 'unsupported') {
+        if (r === 'unsupported') {
           flash('この端末では「まとめて送る」が使えません。下の「写真を保存」と各ボタンをお使いください。')
-        } else {
+        } else if (r === 'failed') {
           flash('送れませんでした。下の「写真を保存」と各ボタンをお試しください。')
         }
-      }, 400)
+        // cancelled は何もしない
+      }, 300)
     })
-  }
-
-  if (sent) {
-    return (
-      <div>
-        <div className="card">
-          <div className="center" style={{ fontSize: '2.6rem' }}>📤✅</div>
-          <h2 className="center">写真を送りました</h2>
-          <p className="center" style={{ marginTop: 0, fontWeight: 700 }}>あと1ステップで完成です！</p>
-          <div className="disclaimer" style={{ background: '#ecfeff', borderColor: '#a5f3fc', color: '#155e75' }}>
-            <div style={{ marginBottom: 8 }}>
-              <strong>１.</strong> 送った先の<strong>AIの画面</strong>が開きます（写真はもう貼られています）。
-            </div>
-            <div style={{ marginBottom: 8 }}>
-              <strong>２.</strong> 文字を入れる欄を<strong>指で長押し</strong>して、出てくる<strong>「ペースト」</strong>を押します。
-            </div>
-            <div>
-              <strong>３.</strong> 質問の文章がはり付くので、<strong>送信（↑）</strong>を押してください。
-            </div>
-          </div>
-          <p className="center muted small" style={{ marginTop: 8 }}>
-            ※ 質問文はコピー済みです。「ペースト」で貼れます。
-          </p>
-          <button
-            className="btn"
-            onClick={async () => {
-              const ok = await copyText(prompt)
-              flash(ok ? 'もう一度コピーしました。AIの欄で長押し→ペーストしてください。' : 'コピーできませんでした。')
-            }}
-          >
-            📋 質問文をもう一度コピーする
-          </button>
-          <button className="btn secondary" style={{ marginTop: 10 }} onClick={() => setSent(false)}>
-            ← 送る画面にもどる
-          </button>
-          <button className="btn ghost" style={{ marginTop: 4 }} onClick={onReset}>
-            最初から
-          </button>
-        </div>
-
-        <div className="disclaimer">
-          <strong>大切なお願い：</strong> AIの説明は<strong>診断ではありません</strong>。
-          気になることは<strong>必ず主治医にご相談ください</strong>。
-        </div>
-
-        {toast && <Toast text={toast} />}
-      </div>
-    )
   }
 
   return (
